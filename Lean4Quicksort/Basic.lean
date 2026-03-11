@@ -1,6 +1,7 @@
 inductive Todo (α : Type) -- divides remaining objects into arrays left to sort and correct numbers
 | Sort : Array α -> Todo α
 | Push : α -> Todo α
+| PushX : Nat -> α -> Todo α
 
 def pivotselect [Ord α] (arr : Array α) : Option (α × Array α) := -- picks the median of first, middle (rounded down) and last element in array
   if h : arr.size = 0 then none
@@ -21,16 +22,19 @@ def pivotselect [Ord α] (arr : Array α) : Option (α × Array α) := -- picks 
       else if le p2 p3 then some (p3, arr.extract 0 (size-1)) -- p2 p3 p1 -> last
       else some (p2, (arr.extract 0 half) ++ (arr.extract (half+1) size)) -- p3 p2 p1 -> middle
 
-def pivotsplitHelper [Ord α] (arr le gt : Array α) (pvt : α) : Array α × Array α := -- split array into less or equal and greater than pivot in one recursive pass
-  let size := arr.size
-  if h : size = 0 then (le, gt) -- if done then return
+def pivotsplitHelper [Ord α] (i eq : Nat) (arr lt gt : Array α) (pvt : α) : Array α × Nat × Array α := -- split array into less or equal and greater than pivot in one recursive pass
+  if h : i < arr.size then
+    let x := arr[i]
+    match compare x pvt with
+    | .lt => pivotsplitHelper (i+1) eq arr (lt.push x) gt pvt
+    | .eq => pivotsplitHelper (i+1) (eq+1) arr lt gt pvt
+    | .gt => pivotsplitHelper (i+1) eq arr lt (gt.push x) pvt
   else
-    if compare arr[0] pvt != .gt then pivotsplitHelper (arr.extract 1 size) (le ++ #[arr[0]]) gt pvt -- not greater -> less or equal -> add to le
-    else pivotsplitHelper (arr.extract 1 size) le (gt ++ #[arr[0]]) pvt -- greater -> add to gt
-termination_by arr.size
+    (lt, eq, gt)
+termination_by arr.size - i
 
-def pivotsplit [Ord α] (arr : Array α) (pvt : α) : Array α × Array α := -- initializes pivotsplitHelper with empty le/gt arrays
-  pivotsplitHelper arr #[] #[] pvt
+def pivotsplit [Ord α] (arr : Array α) (pvt : α) : Array α × Nat × Array α := -- initializes pivotsplitHelper with empty le/gt arrays
+  pivotsplitHelper 0 0 arr #[] #[] pvt
 
 partial def quicksortHelper [Ord α] (todos : List (Todo α)) (acc : Array α) : Array α := -- recursively splits up arrays based on a pivot and schedules tasks using a todo list
   match todos with
@@ -41,11 +45,12 @@ partial def quicksortHelper [Ord α] (todos : List (Todo α)) (acc : Array α) :
     | Todo.Sort arr => -- if the instruction is sort, split the array based on a pivot into two more and leaves the pivot to be pushed
       match pivotselect arr with -- select a good pivot using pivotselect
       | none => quicksortHelper rest acc -- empty array to be sorted, ignore this
-      | some (hd, #[]) => quicksortHelper rest (acc.push hd) -- if only one element, this element must be correct, so push directly
-      | some (hd, tl) =>
-        let (le, gt) := pivotsplit tl hd -- split array into less or equal than and greater than a pivot using pivotsplit
-        let new := Todo.Sort le :: Todo.Push hd :: Todo.Sort gt :: rest -- schedule the tasks in todos
+      | some (pvt, #[]) => quicksortHelper rest (acc.push pvt) -- if only one element, this element must be correct, so push directly
+      | some (pvt, rem) =>
+        let (lt, eq, gt) := pivotsplit rem pvt -- split array into less or equal than and greater than a pivot using pivotsplit
+        let new := Todo.Sort lt :: Todo.PushX (eq+1) pvt :: Todo.Sort gt :: rest -- schedule the tasks in todos
         quicksortHelper new acc -- recurse using the new todo list
+    | Todo.PushX n x => quicksortHelper rest (acc.append (Array.replicate n x))
 
 def quicksort [Ord α] (arr : Array α) : Array α := -- initializes quicksortHelper with empty accumulator
   quicksortHelper [Todo.Sort arr] #[]
