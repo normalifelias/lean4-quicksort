@@ -1,7 +1,7 @@
 inductive Todo (α : Type) -- divides remaining objects into arrays left to sort and correct numbers
 | Sort : Array α -> Todo α
 | Push : α -> Todo α
-| PushX : Nat -> α -> Todo α
+| PushX : Nat -> α -> Todo α -- used for pushing numbers equal to pivot
 
 def pivotselect [Ord α] (arr : Array α) : Option (α × Array α) := -- picks the median of first, middle (rounded down) and last element in array
   if h : arr.size = 0 then none
@@ -26,10 +26,10 @@ def pivotsplitHelper [Ord α] (i eq : Nat) (arr lt gt : Array α) (pvt : α) : A
   if h : i < arr.size then
     let x := arr[i]
     match compare x pvt with
-    | .lt => pivotsplitHelper (i+1) eq arr (lt.push x) gt pvt
-    | .eq => pivotsplitHelper (i+1) (eq+1) arr lt gt pvt
-    | .gt => pivotsplitHelper (i+1) eq arr lt (gt.push x) pvt
-  else
+    | .lt => pivotsplitHelper (i+1) eq arr (lt.push x) gt pvt -- smaller -> add to smaller
+    | .eq => pivotsplitHelper (i+1) (eq+1) arr lt gt pvt -- equal -> iterate up equal count
+    | .gt => pivotsplitHelper (i+1) eq arr lt (gt.push x) pvt --> larger -> add to larger
+  else -- if array is through return all arrays
     (lt, eq, gt)
 termination_by arr.size - i
 
@@ -57,5 +57,7 @@ def quicksort [Ord α] (arr : Array α) : Array α := -- initializes quicksortHe
 
 def demoArray1 : Array Nat := #[47, 13, 82, 6, 91, 34, 57, 23, 76, 41, 88, 3, 65, 29, 54, 17, 72, 39, 84, 11, 63, 28, 95, 42, 7, 56, 31, 78, 19, 67, 44, 90, 25, 58, 14, 83, 37, 62, 9, 71, 48, 26, 93, 15, 52, 38, 77, 22, 69, 4, 86, 33, 61, 18, 45, 79, 12, 57, 35, 81, 24, 68, 43, 96, 8, 53, 27, 74, 16, 89, 41, 64, 30, 55, 20, 73, 46, 85, 10, 60, 36, 92, 21, 49, 66, 32, 75, 5, 87, 40, 59, 28, 70, 38, 94, 50, 80, 2, 97, 44]
 #eval quicksort demoArray1
+#eval (quicksort demoArray1) == demoArray1.insertionSort
 def demoArray2 : Array String := #["Byte", "Gamma", "%", "Alpha", "·", "Beta", "Uranium", "$", "Aaron", "Xenon", "G", "e", "f(x)", "Über", "×"]
 #eval quicksort demoArray2
+#eval (quicksort demoArray2) == demoArray2.insertionSort

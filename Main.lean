@@ -1,4 +1,5 @@
-import Lean4Quicksort
+import Lean4Quicksort.Basic
+import Lean4Quicksort.Benchmark
 
 def main : IO Unit :=
-  IO.println s!"Hello World!"
+  benchmark 10 100000 quicksort
