@@ -55,7 +55,6 @@ def pivotsplitHelper [Ord α] (i eq : Nat) (arr lt gt : Array α) (pvt : α) : A
 termination_by arr.size - i
 
 
-
 /- wrappers -/
 
 def pivotsplit [Ord α] (arr : Array α) (pvt : α): Array α × Nat × Array α :=
@@ -76,6 +75,11 @@ partial def quicksortHelper [Ord α] (todos : List (Todo α)) (acc : Array α) :
     match inst with
     | Todo.Push n x => quicksortHelper rest (acc.append (Array.replicate n x))
     | Todo.Sort arr =>
+
+      if arr.size < 20 then
+        let lt := fun a b => compare a b == .lt
+        quicksortHelper rest (acc.append (arr.insertionSort lt))
+      else
 
       match pivotselect arr with
       | none => quicksortHelper rest acc
