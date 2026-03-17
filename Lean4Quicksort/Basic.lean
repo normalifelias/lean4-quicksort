@@ -4,7 +4,7 @@
 
 inductive Todo (α : Type)
 | Sort : Array α → Todo α
-| Push : Nat -> α → Todo α
+| Push : Nat → α → Todo α
 
 
 /- functions -/
@@ -12,31 +12,25 @@ inductive Todo (α : Type)
 -- pivotselect: select a pivot using the median of start, middle, and end of the array
 -- pivotsplit: divide array into smaller than, equal to, or greater than a pivot
 
-def pivotselect [Ord α] (arr : Array α) : Option (α) :=
+def pivotselect [Ord α] (arr : Array α) (h : arr.size > 0) : α :=
 
-  if h : arr.size = 0 then
-    none
-  else if arr.size < 3 then
-    some arr[0]
+  let size := arr.size
+  let half := size/2
+
+  let p1 := arr[0]
+  let p2 := arr[half]
+  let p3 := arr[size - 1]
+
+  let le := fun a b => compare a b != .gt
+
+  if le p1 p2 then
+    if le p2 p3 then p2
+    else if le p1 p3 then p3
+    else p1
   else
-
-    let size := arr.size
-    let half := size/2
-
-    let p1 := arr[0]
-    let p2 := arr[half]
-    let p3 := arr[size - 1]
-
-    let le := fun a b => compare a b != .gt
-
-    if le p1 p2 then
-      if le p2 p3 then some p2
-      else if le p1 p3 then some p3
-      else some p1
-    else
-      if le p1 p3 then some p1
-      else if le p2 p3 then some p3
-      else some p2
+    if le p1 p3 then p1
+    else if le p2 p3 then p3
+    else p2
 
 
 def pivotsplitHelper [Ord α] (i eq : Nat) (arr lt gt : Array α) (pvt : α) : Array α × Nat × Array α :=
@@ -76,15 +70,12 @@ partial def quicksortHelper [Ord α] (todos : List (Todo α)) (acc : Array α) :
     | Todo.Push n x => quicksortHelper rest (acc.append (Array.replicate n x))
     | Todo.Sort arr =>
 
-      if arr.size < 20 then
+      if h : arr.size < 28 then
         let lt := fun a b => compare a b == .lt
         quicksortHelper rest (acc.append (arr.insertionSort lt))
       else
 
-      match pivotselect arr with
-      | none => quicksortHelper rest acc
-      | some pvt =>
-
+        let pvt := pivotselect arr (by omega)
         let (lt, eq, gt) := pivotsplit arr pvt
         let new := Todo.Sort lt :: Todo.Push eq pvt :: Todo.Sort gt :: rest
 
