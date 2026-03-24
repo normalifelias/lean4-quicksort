@@ -15,11 +15,23 @@ where
     else
       xs
 
-def index (n : Nat) : String :=
-  if n < 9 then
-    "0" ++ (toString (n+1))
-  else
+def index (n max : Nat) : String :=
+  if max > 999 then
     (toString (n+1))
+  else if max > 99 then
+    if n < 9 then
+      "00" ++ (toString (n+1))
+    else
+      if n < 99 then
+        "0" ++ (toString (n+1))
+      else
+        (toString (n+1))
+  else if max > 9 then
+    if n < 9 then
+      "0" ++ (toString (n+1))
+    else
+      (toString (n+1))
+  else (toString (n+1))
 
 def benchmark (tests n : Nat) (sort : Array Nat → Array Nat) : IO Unit := do -- run the IO quicksort with a shuffled array of size n
   let seed := UInt64.toNat (ByteArray.toUInt64LE! (← IO.getRandomBytes 8))
@@ -38,6 +50,6 @@ def benchmark (tests n : Nat) (sort : Array Nat → Array Nat) : IO Unit := do -
     else if dms < 200 then ind := "●"
     else if dms < 500 then ind := "⚠"
     else ind := "✖"
-    IO.println s!"│ {index i} │ {dms}ms │ {ind}"
+    IO.println s!"│ {index i tests} │ {dms}ms │ {ind}"
   IO.println s!"╰─"
   return ()
