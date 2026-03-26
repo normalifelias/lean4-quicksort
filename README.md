@@ -6,5 +6,6 @@ Usage: benchmark [number of tests] [number of elements] [target sorting algorith
   
 **Notes**  
   
-- Precalculating arr.size for pivotsplitHelper does not show any notable performance improvements (simplified by compiler?)  
-- Rewrite using lo-hi ranges WIP, should allow for efficient in-place sorting
+- Algorithm in Basic.lean is currently around 33% faster than Std implementation (Array.qsort)
+- Precalculating arr.size for pivotsplitHelper in Basic.lean does not show any notable performance improvements (simplified by compiler?)  
+- Rewrite using lo-hi ranges WIP, currently significantly slower than old implementation (Basic.lean)
