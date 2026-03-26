@@ -41,15 +41,12 @@ def benchmark (tests n : Nat) (sort : Array Nat → Array Nat) : IO Unit := do -
   IO.println s!"╭─ benchmark"
   for i in 0...tests do
     let before ← Std.Time.Timestamp.now
-    discard <| sortIO shuffled sort
+    let sortArr ←  sortIO shuffled sort
     let duration ← before.since
     let dms := duration.toMilliseconds
-    let mut ind := ""
-    if dms <= 50 then ind := "★"
-    else if dms < 100 then ind := "✔"
-    else if dms < 200 then ind := "●"
-    else if dms < 500 then ind := "⚠"
-    else ind := "✖"
+    let ind := match (sortArr == shuffled.qsort) with
+    | true => "✓"
+    | false => "✗"
     IO.println s!"│ {index i tests} │ {dms}ms │ {ind}"
   IO.println s!"╰─"
   return ()
