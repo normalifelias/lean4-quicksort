@@ -1,8 +1,3 @@
-/- datatypes and structures -/
-
--- Todo: differentiate tasks between unsorted numbers and finished numbers
-
-
 /- functions -/
 
 -- pivotselect: select a pivot using the median of start, middle, and end of the array
