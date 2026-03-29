@@ -23,28 +23,37 @@ def pivotselect [Ord α]
       else p2
 
 
-partial def pivotsplitHelper [Ord α]
-  (arr lt gt : Array α) (ind hi eq : Nat) (pvt : α)
-  : Array α × Nat × Array α :=
+partial def dnfhelper [Ord α]
+  (arr : Array α) (i j k : Nat) (pvt : α)
+  : Array α × Nat × Nat :=
 
-  if h: ind > hi then
-    (lt, eq, gt)
+  if j <= k then
+    match compare (arr[j]'sorry) pvt with
 
-  else
-    let x := arr[ind]'sorry
-    match compare x pvt with
-    | .lt => pivotsplitHelper arr (lt.push x) gt (ind+1) hi eq pvt
-    | .eq => pivotsplitHelper arr lt gt (ind+1) hi (eq+1) pvt
-    | .gt => pivotsplitHelper arr lt (gt.push x) (ind+1) hi eq pvt
+    | .lt =>
+      let arr := arr.swap i j sorry sorry
+      dnfhelper arr (i+1) (j+1) k pvt
+
+    | .gt =>
+        if h : k = 0 then
+          (arr, i, j)
+        else
+          let arr := arr.swap j k sorry sorry
+          dnfhelper arr i j (k-1) pvt
+
+    | .eq =>
+      dnfhelper arr i (j+1) k pvt
+
+  else (arr, i, j)
 
 
 /- wrappers -/
 
-def pivotsplit [Ord α]
+def dnf [Ord α]
   (arr : Array α) (lo hi : Nat) (pvt : α)
-  : Array α × Nat × Array α :=
+  : Array α × Nat × Nat :=
 
-  pivotsplitHelper arr #[] #[] lo hi 0 pvt
+  dnfhelper arr lo lo hi pvt
 
 
 /- main algorithm + wrapper -/
@@ -57,27 +66,15 @@ partial def quicksortHelper [Ord α]
   | [] => arr
   | (lo, hi) :: rest =>
 
-    let pre := arr.extract 0 lo
-    let post := arr.extract (hi+1) arr.size
-
-    if hi-lo < 28 then
-      let ts := arr.extract lo (hi+1)
-
-      let lt := fun a b => compare a b == .lt
-      let srt := ts.insertionSort lt
-
-      let na := pre ++ srt ++ post
-
-      quicksortHelper na rest
-
+    if hi <= lo then
+      quicksortHelper arr rest
     else
+
       let pvt := pivotselect arr lo hi
-      let (lt, eq, gt) := pivotsplit arr lo hi pvt
+      let (arr, lt, gt) := dnf arr lo hi pvt
 
-      let na := pre ++ lt ++ Array.replicate eq pvt ++ gt ++ post
-      let nt := (lo, (lo+lt.size-1)) :: ((lo+lt.size+eq), hi) :: rest
-
-      quicksortHelper na nt
+      let nt := (lo, lt-1) :: (gt, hi) :: rest
+      quicksortHelper arr nt
 
 
 def quicksort [Ord α]
