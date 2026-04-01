@@ -93,3 +93,51 @@ def demoArray1 : Array Nat := #[47, 13, 82, 6, 91, 34, 57, 23, 76, 41, 88, 3, 65
 def demoArray2 : Array String := #["Byte", "Gamma", "%", "Alpha", "·", "Beta", "Uranium", "$", "Aaron", "Xenon", "G", "e", "f(x)", "Über", "×"]
 #eval quicksort demoArray2 -- return array:
 #eval (quicksort demoArray2) == demoArray2.insertionSort -- is sorted:
+
+--Version 2: Sliced (naming: sllo / slhi for unpartitioned functions; lo mid hi fin for dnf) (Bounds: always the first index of their area => Upper bounds are exclusive!)
+
+def pivotselect2 [Ord α] (arr : Vector α size) (sllo slhi : Nat) : α :=
+  let p1 := arr[sllo]'sorry
+  let p2 := arr[sllo + (slhi - sllo)/2]'sorry
+  let p3 := arr[slhi - 1]'sorry
+
+  let le := fun a b => compare a b != .gt
+
+  if le p1 p2 then
+    if le p2 p3 then p2
+    else if le p1 p3 then p3
+    else p1
+  else
+    if le p1 p3 then p1
+    else if le p2 p3 then p3
+    else p2
+
+
+partial def dnfhelper2 [Ord α] (arr : Vector α size) (pvt : α) (eq unproc fin_unproc : Nat) : Vector α size × Nat × Nat :=
+  if unproc > fin_unproc then (arr, eq, fin_unproc + 1) else
+  match compare (arr[unproc]'sorry) pvt with
+  | .lt => dnfhelper2 (arr.swap unproc eq sorry sorry) pvt (eq + 1) (unproc + 1) fin_unproc
+  | .gt => if fin_unproc = 0 then (arr, 0, 1) else
+           dnfhelper2 (arr.swap unproc fin_unproc sorry sorry) pvt eq unproc (fin_unproc - 1)
+  | .eq => dnfhelper2 arr pvt eq (unproc + 1) fin_unproc
+
+def dnf2 [Ord α] (arr : Vector α size) (pvt : α) (sllo slhi : Nat) : Vector α size × Nat × Nat :=
+  dnfhelper2 arr pvt sllo sllo (slhi - 1)
+
+partial def quicksorthelper2 [Ord α] (arr : Vector α  size) (sllo slhi : Nat) : Vector α size :=
+  if slhi - sllo ≤ 1 then arr else
+  let pvt := pivotselect2 arr sllo slhi--arr[sllo]'sorry
+  let (arr_parted, mid, hi) := dnf2 arr pvt sllo slhi
+  --if hi - mid = slhi -sllo then arr_parted else ???
+  if mid - sllo > slhi - hi then
+    let arr_half_sorted := quicksorthelper2 arr_parted hi slhi
+    quicksorthelper2 arr_half_sorted sllo mid
+  else
+    let arr_half_sorted := quicksorthelper2 arr_parted sllo mid
+    quicksorthelper2 arr_half_sorted hi slhi
+
+def quicksort2 [Ord α] (arr : Array α) : Array α :=
+  (quicksorthelper2 arr.toVector 0 arr.size).toArray
+
+#eval quicksort2 (demoArray1 ++ demoArray1) -- return array:
+#eval (quicksort2 demoArray1) == demoArray1.insertionSort -- is sorted:
