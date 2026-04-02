@@ -33,12 +33,12 @@ def index (n max : Nat) : String :=
       (toString (n+1))
   else (toString (n+1))
 
-def benchmark (tests n : Nat) (sort : Array Nat → Array Nat) : IO Unit := do -- run the IO quicksort with a shuffled array of size n
+def benchmark (tests n : Nat) (sort : Array Nat → Array Nat) (title : String): IO Unit := do -- run the IO quicksort with a shuffled array of size n
   let seed := UInt64.toNat (ByteArray.toUInt64LE! (← IO.getRandomBytes 8))
   let gen := mkStdGen seed
   let arr := Array.range n
   let shuffled := shuffle arr gen
-  IO.println s!"╭─ benchmark"
+  IO.println s!"╭─ {title}"
   for i in 0...tests do
     let before ← Std.Time.Timestamp.now
     let sortArr ←  sortIO shuffled sort
