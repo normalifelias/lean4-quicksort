@@ -57,15 +57,15 @@ partial def quicksorthelper2 [Ord α]
   let pvt := pivotselect2 arr sllo slhi--arr[sllo]'sorry
   let (arr_parted, mid, hi) := dnf2 arr pvt sllo slhi
 
-  if mid - sllo > slhi - hi then
+  --if mid - sllo > slhi - hi then --worth it?
 
     let arr_half_sorted := quicksorthelper2 arr_parted hi slhi
     quicksorthelper2 arr_half_sorted sllo mid
 
-  else
+  /-else
 
     let arr_half_sorted := quicksorthelper2 arr_parted sllo mid
-    quicksorthelper2 arr_half_sorted hi slhi
+    quicksorthelper2 arr_half_sorted hi slhi-/
 
 
 def quicksort2 [Ord α] -- wrapper?
@@ -74,6 +74,7 @@ def quicksort2 [Ord α] -- wrapper?
 
   (quicksorthelper2 arr.toVector 0 arr.size).toArray
 
+--missing: Vector.qsort
 
 /- testing -/
 

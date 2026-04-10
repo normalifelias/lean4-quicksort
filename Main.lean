@@ -10,3 +10,4 @@ import Lean4Quicksort.Benchmark
 def main : IO Unit := do
   benchmark 3 1000000 quicksort "V1"
   benchmark 3 1000000 quicksort2 "V2"
+  benchmark 3 1000000 Array.qsort "qsort"
