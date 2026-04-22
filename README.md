@@ -24,3 +24,4 @@ Usage: benchmark [number of tests] [number of elements] [target sorting algorith
 - stylistic enhancements
 - setup development
 
+- Why is ASC DSC Range so slow??
