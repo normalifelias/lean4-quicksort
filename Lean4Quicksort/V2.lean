@@ -9,10 +9,10 @@ def pivotselect2 [Ord α] [ToString α]
   (arr : Vector α size) (lo hi : Nat)
   (hlo : lo ≥ 0) (hhi : hi ≤ size) (hlohi : lo < hi)
   : α :=
-  if hi - lo ≤ 1 then arr[lo] else
+
   let p1 := arr[lo]
   let p2 := arr[lo + (hi - lo)/2]
-  let p3 := arr[hi - 2]
+  let p3 := arr[hi - 1]
 
   let le := fun a b => compare a b != .gt
 
