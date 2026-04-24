@@ -36,13 +36,14 @@ def dnfhelper2 [Ord α] [ToString α]
     (arr, eq, fin_unproc + 1)
   else
   -/
-    match compare (arr[unproc]'(by omega)) pvt with
+    match compare (arr[unproc]) pvt with
     | .lt =>
       if hfin : unproc ≥ fin_unproc then ⟨((arr.swap unproc eq (by omega) (by omega)), eq + 1, fin_unproc + 1), (by simp; omega)⟩ else
       dnfhelper2 (arr.swap unproc eq (by omega) (by omega)) pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
     | .gt =>
       if hfin : unproc ≥ fin_unproc then ⟨((arr.swap unproc fin_unproc (by omega) (by omega)), eq, fin_unproc), (by simp; omega)⟩ else
+      if compare arr[fin_unproc] arr[unproc] = .gt then dnfhelper2 arr pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
       dnfhelper2 (arr.swap unproc fin_unproc (by omega) (by omega)) pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
     | .eq =>
