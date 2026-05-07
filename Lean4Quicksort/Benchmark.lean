@@ -44,7 +44,53 @@ def benchmark (tests n : Nat) (sort : Array Nat → Array Nat) (title : String):
     let sortArr ←  sortIO shuffled sort
     let duration ← before.since
     let dms := duration.toMilliseconds
-    let ind := match (sortArr == shuffled.qsort) with
+    let ind := match (sortArr == arr) with
+    | true => "✓"
+    | false => "✗"
+    IO.println s!"│ {index i tests} │ {dms}ms │ {ind}"
+  IO.println s!"╰─"
+  return ()
+
+def benchmarkASC (tests n : Nat) (sort : Array Nat → Array Nat) (title : String): IO Unit := do -- run the IO quicksort with a shuffled array of size n
+  let arr := Array.range n
+  IO.println s!"╭─ {title}"
+  for i in 0...tests do
+    let before ← Std.Time.Timestamp.now
+    let sortArr ←  sortIO arr sort
+    let duration ← before.since
+    let dms := duration.toMilliseconds
+    let ind := match (sortArr == arr) with
+    | true => "✓"
+    | false => "✗"
+    IO.println s!"│ {index i tests} │ {dms}ms │ {ind}"
+  IO.println s!"╰─"
+  return ()
+
+def benchmarkDSC (tests n : Nat) (sort : Array Nat → Array Nat) (title : String): IO Unit := do -- run the IO quicksort with a shuffled array of size n
+  let arr := (Array.range n).reverse
+  IO.println s!"╭─ {title}"
+  for i in 0...tests do
+    let before ← Std.Time.Timestamp.now
+    let sortArr ←  sortIO arr sort
+    let duration ← before.since
+    let dms := duration.toMilliseconds
+    let ind := match (sortArr == arr.reverse) with
+    | true => "✓"
+    | false => "✗"
+    IO.println s!"│ {index i tests} │ {dms}ms │ {ind}"
+  IO.println s!"╰─"
+  return ()
+
+
+def benchmarkRPL (tests n : Nat) (sort : Array Nat → Array Nat) (title : String): IO Unit := do -- run the IO quicksort with a shuffled array of size n
+  let arr := Array.replicate n 1
+  IO.println s!"╭─ {title}"
+  for i in 0...tests do
+    let before ← Std.Time.Timestamp.now
+    let sortArr ←  sortIO arr sort
+    let duration ← before.since
+    let dms := duration.toMilliseconds
+    let ind := match (sortArr == Array.replicate n 1) with
     | true => "✓"
     | false => "✗"
     IO.println s!"│ {index i tests} │ {dms}ms │ {ind}"
