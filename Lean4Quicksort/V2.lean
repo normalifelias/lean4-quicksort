@@ -25,7 +25,7 @@ partial def qinsertionSort [Ord α]
 
 def pivotselect2 [Ord α]
   (arr : Vector α size) (lo hi : Nat)
-  (hlo : lo ≥ 0) (hhi : hi ≤ size) (hlohi : lo < hi)
+  (hhi : hi ≤ size) (hlohi : lo < hi)
   : α :=
 
   let p1 := arr[lo]
@@ -44,10 +44,61 @@ def pivotselect2 [Ord α]
     else p2
 
 
+def pivotselect3 [Ord α]
+  (arr : Vector α size) (lo hi : Nat)
+  (hhi : hi ≤ size) (hlohi : lo < hi)
+  : {idx : Nat // lo ≤ idx ∧ idx < hi} :=
+
+  let p1 := arr[lo]
+  let p2 := arr[lo + (hi - lo)/2]
+  let p3 := arr[hi - 1]
+
+  let le := fun a b => compare a b != .gt
+
+  if le p1 p2 then
+    if le p2 p3 then ⟨lo + (hi - lo)/2, (by omega)⟩
+    else if le p1 p3 then ⟨hi - 1, (by omega)⟩
+    else ⟨lo, (by omega)⟩
+  else
+    if le p1 p3 then ⟨lo, (by omega)⟩
+    else if le p2 p3 then ⟨hi - 1, (by omega)⟩
+    else ⟨lo + (hi - lo)/2, (by omega)⟩
+
+
+def dnfhelper3 [Ord α]
+  (arr : Vector α size) (eq unproc fin_unproc : Nat) (sllo slhi : Nat)
+  (heq_unproc : eq < unproc) (hunproc_fin_unproc : unproc ≤ fin_unproc) (hfin_unproc : fin_unproc < size)
+  (hsllo : sllo ≤ eq) (hfin_unproc_slhi : fin_unproc < slhi) (hlohi : slhi - sllo > 1) (hslhi : slhi ≤ size)
+
+
+  : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size ∧ r.snd.fst < r.snd.snd} :=
+  /-
+  if unproc > fin_unproc then
+    (arr, eq, fin_unproc + 1)
+  else
+  -/
+    match compare arr[unproc] arr[eq] with
+    | .lt =>
+      if hfin : unproc ≥ fin_unproc then ⟨((arr.swap unproc eq (by omega) (by omega)), eq + 1, fin_unproc + 1), (by simp; omega)⟩ else
+      if compare arr[eq] arr[unproc] = .lt then dnfhelper3 arr  (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)  else
+      dnfhelper3 (arr.swap unproc eq (by omega) (by omega))  (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+    | .gt =>
+      if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc), (by simp; omega)⟩ else
+      if compare arr[fin_unproc] arr[unproc] = .gt then dnfhelper3 arr  eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)  else
+      dnfhelper3 (arr.swap unproc fin_unproc (by omega) (by omega))  eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+    | .eq =>
+      if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc + 1), (by simp; omega)⟩ else
+      dnfhelper3 arr  eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+
+-- IDEA: Carry index of pvt instead of pvt itself => already proven that pvt ∈ arr!
+
 def dnfhelper2 [Ord α]
   (arr : Vector α size) (pvt : α) (eq unproc fin_unproc : Nat) (sllo slhi : Nat)
-  (heq : 0 ≤ eq) (heq_unproc : eq ≤ unproc) (hunproc_fin_unproc : unproc ≤ fin_unproc) (hfin_unproc : fin_unproc < size)
-  (hsllo : sllo ≤ eq) (hslhi : fin_unproc < slhi)
+  (heq_unproc : eq ≤ unproc) (hunproc_fin_unproc : unproc ≤ fin_unproc) (hfin_unproc : fin_unproc < size)
+  (hsllo : sllo ≤ eq) (hslhi : fin_unproc < slhi) (hlohi : slhi - sllo > 1)
   : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size} :=
   /-
   if unproc > fin_unproc then
@@ -61,7 +112,7 @@ def dnfhelper2 [Ord α]
       dnfhelper2 (arr.swap unproc eq (by omega) (by omega)) pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
     | .gt =>
-      if hfin : unproc ≥ fin_unproc then ⟨((arr.swap unproc fin_unproc (by omega) (by omega)), eq, fin_unproc), (by simp; omega)⟩ else
+      if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc), (by simp; omega)⟩ else
       if compare arr[fin_unproc] arr[unproc] = .gt then dnfhelper2 arr pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
       dnfhelper2 (arr.swap unproc fin_unproc (by omega) (by omega)) pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
@@ -70,17 +121,28 @@ def dnfhelper2 [Ord α]
       dnfhelper2 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
 
+def dnf3 [Ord α] -- wrapper
+  (arr : Vector α size) (pvt : Nat) (sllo slhi : Nat)
+  (hlohi : slhi - sllo > 1) (hhi : slhi ≤ size)
+  (hpvt : sllo ≤ pvt ∧ pvt < slhi)
+  : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size ∧ r.snd.fst < r.snd.snd} :=
+  --dbg_trace s!"pvt: {pvt}, sllo: {sllo}, slhi: {slhi}"
+  dnfhelper3 (arr.swap pvt sllo) sllo (sllo+1) (slhi - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+
 def dnf2 [Ord α] -- wrapper
   (arr : Vector α size) (pvt : α) (sllo slhi : Nat)
-  (hlo : 0 ≤ sllo) (hlohi : sllo < slhi) (hhi : slhi ≤ size)
+  (hlohi : slhi - sllo > 1) (hhi : slhi ≤ size)
   : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size} :=
   --dbg_trace s!"pvt: {pvt}, sllo: {sllo}, slhi: {slhi}"
   dnfhelper2 arr pvt sllo sllo (slhi - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
+
+
 -- add theorem : If pvt is in arr, then mid < hi, not only mid ≤ hi => termination proof fpr quicksorthelper2?
 /- main algorithm -/
 
-partial def quicksorthelper2 [Ord α]
+def quicksorthelper2 [Ord α]
   (arr : Vector α  size) (sllo slhi : Nat)
   (hsllo : 0 ≤ sllo) (hslloslhi : sllo ≤ slhi) (hslhi : slhi ≤ size)
   : Vector α size :=
@@ -88,19 +150,22 @@ partial def quicksorthelper2 [Ord α]
   if hfin : slhi - sllo ≤ 1 then arr else
   if slhi - sllo ≤ 16 then qinsertionSort arr sllo slhi (sllo + 1) else
   --dbg_trace s!"Array: {arr.toArray}"
-  let pvt : α := pivotselect2 arr sllo slhi (by omega) (by omega) (by omega)
-  let ⟨(arr_parted, mid, hi), ⟨h1, h2, h3⟩⟩ := dnf2 arr pvt sllo slhi (by omega) (by omega) (by omega)
+  /-let pvt : α := pivotselect2 arr sllo slhi (by omega) (by omega)
+  let ⟨(arr_parted, mid, hi), ⟨h1, h2, h3⟩⟩ := dnf2 arr pvt sllo slhi (by omega) (by omega)-/
+  let pvt := pivotselect3 arr sllo slhi (by omega) (by omega)
+  let ⟨(arr_parted, mid, hi), ⟨h1, h2, h3, h4⟩⟩ := dnf3 arr pvt sllo slhi (by omega) (by omega) (by omega)
 
-  if (mid - sllo) > (slhi - hi) then --worth it?
-
+  --if mid - sllo > slhi - hi then --worth it?
+    have hterm : slhi - hi < slhi - sllo := by grind
     let arr_half_sorted := quicksorthelper2 arr_parted hi slhi (by omega) (by omega) (by omega)
+    have hterm2 : mid - sllo < slhi - sllo := by grind
     quicksorthelper2 arr_half_sorted sllo mid (by omega) (by omega) (by omega)
 
-  else
+  /-else
 
-    let arr_half_sorted := quicksorthelper2 arr_parted sllo mid (by omega) (by omega) (by omega)
-    quicksorthelper2 arr_half_sorted hi slhi (by omega) (by omega) (by omega)
-
+    let arr_half_sorted := quicksorthelper2 arr_parted sllo mid
+    quicksorthelper2 arr_half_sorted hi slhi-/
+termination_by slhi - sllo
 
 def Array.quicksort2 [Ord α]  --wrapper
   (arr : Array α)

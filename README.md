@@ -18,15 +18,15 @@ Usage: benchmark [number of tests] [number of elements] [target sorting algorith
 
 
 **TODO:**
-- no more sorry DONE
-- insertion sort
+- no more sorry | DONE
+- insertion sort | kinda done
 - permutation + pairwise (from the bottom up) (additional requirements for Ord => LE a, Ord a, Std.LawfulOrderOrd a, Std.IsLinearPreorder a; maybe also LT)
 - stylistic enhancements
-- setup development
+- setup development | DONE
 
-- Why is ASC DSC Range so slow?? DONE
+- Why is ASC DSC Range so slow?? | DONE
 
 - test more patterns!
 - LEAN integrated benchmark next session!
 - optimise further if possible (maybe replace Ord with LE for fun?)
-- remove partial
+- remove partial | kinda done
