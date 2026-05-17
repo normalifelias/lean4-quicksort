@@ -5,22 +5,25 @@
 
 /- functions -/
 
-partial def qinsertionSort [Ord α]
+def qinsertionSort [Ord α]
   (arr : Vector α size) (lo hi i : Nat)
+  (hlohi : lo < hi) (hhi : hi ≤ size)
+  (hilo : lo ≤ i) (hihi : i ≤ hi)
   : Vector α size :=
 
-  if i = hi then arr else
+  if hfin : i = hi then arr else
 
-  let rec movedown [Ord α] (arr : Vector α size) (j : Nat) : Vector α size :=
+  let rec movedown [Ord α] (arr : Vector α size) (j : Nat) (hjlo : lo ≤ j) (hjhi : j < hi) : Vector α size :=
 
-    if j == lo then arr else
+    if hfin : j = lo then arr else
 
-    if compare (arr[j]'sorry) (arr[j - 1]'sorry) = .lt then
-      movedown (arr.swap j (j - 1) sorry sorry) (j - 1)
+    if compare (arr[j]) (arr[j - 1]) = .lt then
+
+      movedown (arr.swap j (j - 1)) (j - 1) (by omega) (by omega)
 
     else arr
 
-  qinsertionSort (movedown arr i) lo hi (i + 1)
+  qinsertionSort (movedown arr i (by omega) (by omega)) lo hi (i + 1) (by omega) (by omega) (by omega) (by omega)
 
 
 def pivotselect2 [Ord α]
@@ -148,7 +151,7 @@ def quicksorthelper2 [Ord α]
   : Vector α size :=
 
   if hfin : slhi - sllo ≤ 1 then arr else
-  if slhi - sllo ≤ 16 then qinsertionSort arr sllo slhi (sllo + 1) else
+  if slhi - sllo ≤ 16 then qinsertionSort arr sllo slhi (sllo + 1) (by omega) (by omega) (by omega) (by omega) else
   --dbg_trace s!"Array: {arr.toArray}"
   /-let pvt : α := pivotselect2 arr sllo slhi (by omega) (by omega)
   let ⟨(arr_parted, mid, hi), ⟨h1, h2, h3⟩⟩ := dnf2 arr pvt sllo slhi (by omega) (by omega)-/
