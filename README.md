@@ -30,3 +30,7 @@ Usage: benchmark [number of tests] [number of elements] [target sorting algorith
 - LEAN integrated benchmark next session!
 - optimise further if possible (maybe replace Ord with LE for fun?)
 - remove partial | kinda done
+
+- develop dnf4
+- Implement Ord from lt 
+- migrate
