@@ -83,8 +83,7 @@ def dnfhelper3 [Ord α]
     match compare arr[unproc] arr[eq] with
     | .lt =>
       if hfin : unproc ≥ fin_unproc then ⟨((arr.swap unproc eq (by omega) (by omega)), eq + 1, fin_unproc + 1), (by simp; omega)⟩ else
-      if compare arr[eq] arr[unproc] = .lt then dnfhelper3 arr  (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)  else
-      dnfhelper3 (arr.swap unproc eq (by omega) (by omega))  (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+      dnfhelper3 arr  (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
     | .gt =>
       if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc), (by simp; omega)⟩ else
@@ -124,6 +123,28 @@ def dnfhelper2 [Ord α]
       dnfhelper2 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
 
+partial def dnfhelper4 [Ord α]
+  (arr : Vector α size) (pvt eq unproc fin_unproc : Nat) (sllo slhi : Nat)
+  : (Vector α size × Nat × Nat) :=
+
+  match compare (arr[unproc]'sorry) (arr[pvt]'sorry) with
+  | .lt =>
+    if unproc ≥ fin_unproc then ((arr.swap unproc eq (by sorry) (by sorry)), eq + 1, fin_unproc + 1) else
+    if compare (arr[eq]'sorry) (arr[unproc]'sorry) = .lt then dnfhelper4 arr pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi else
+    if eq == pvt then dnfhelper4 (arr.swap unproc eq (by sorry) (by sorry)) unproc (eq + 1) (unproc + 1) fin_unproc sllo slhi else
+    dnfhelper4 (arr.swap unproc eq (by sorry) (by sorry)) pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi
+
+  | .gt =>
+    if unproc ≥ fin_unproc then (arr, eq, fin_unproc) else
+    if compare (arr[fin_unproc]'sorry) (arr[unproc]'sorry) = .gt then dnfhelper4 arr pvt eq unproc (fin_unproc - 1) sllo slhi else
+    if fin_unproc == pvt then dnfhelper4 (arr.swap unproc fin_unproc (by sorry) (by sorry)) unproc eq unproc (fin_unproc - 1) sllo slhi
+    else dnfhelper4 (arr.swap unproc fin_unproc (by sorry) (by sorry)) pvt eq unproc (fin_unproc - 1) sllo slhi
+
+  | .eq =>
+    if unproc ≥ fin_unproc then (arr, eq, fin_unproc + 1) else
+    dnfhelper4 arr pvt eq (unproc + 1) fin_unproc sllo slhi
+
+
 def dnf3 [Ord α] -- wrapper
   (arr : Vector α size) (pvt : Nat) (sllo slhi : Nat)
   (hlohi : slhi - sllo > 1) (hhi : slhi ≤ size)
@@ -141,6 +162,12 @@ def dnf2 [Ord α] -- wrapper
   dnfhelper2 arr pvt sllo sllo (slhi - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
 
+def dnf4 [Ord α]
+  (arr : Vector α size) (pvt : Nat) (sllo slhi : Nat)
+  : (Vector α size × Nat × Nat) :=
+
+  dnfhelper4 arr pvt sllo sllo (slhi - 1) sllo slhi
+
 
 -- add theorem : If pvt is in arr, then mid < hi, not only mid ≤ hi => termination proof fpr quicksorthelper2?
 /- main algorithm -/
@@ -156,13 +183,13 @@ def quicksorthelper2 [Ord α]
   /-let pvt : α := pivotselect2 arr sllo slhi (by omega) (by omega)
   let ⟨(arr_parted, mid, hi), ⟨h1, h2, h3⟩⟩ := dnf2 arr pvt sllo slhi (by omega) (by omega)-/
   let pvt := pivotselect3 arr sllo slhi (by omega) (by omega)
-  let ⟨(arr_parted, mid, hi), ⟨h1, h2, h3, h4⟩⟩ := dnf3 arr pvt sllo slhi (by omega) (by omega) (by omega)
+  let (arr_parted, mid, hi) := (dnf4 arr pvt sllo slhi)
 
   --if mid - sllo > slhi - hi then --worth it?
-    have hterm : slhi - hi < slhi - sllo := by grind
-    let arr_half_sorted := quicksorthelper2 arr_parted hi slhi (by omega) (by omega) (by omega)
-    have hterm2 : mid - sllo < slhi - sllo := by grind
-    quicksorthelper2 arr_half_sorted sllo mid (by omega) (by omega) (by omega)
+    have hterm : slhi - hi < slhi - sllo := by sorry
+    let arr_half_sorted := quicksorthelper2 arr_parted hi slhi (by omega) (by sorry) (by omega)
+    have hterm2 : mid - sllo < slhi - sllo := by sorry
+    quicksorthelper2 arr_half_sorted sllo mid (by omega) (by sorry) (by omega)
 
   /-else
 
@@ -184,4 +211,4 @@ def Vector.quicksort2 [Ord α]  {size} (arr : Vector α size) : Vector α size:=
 /- testing -/
 
 def demoArray2 : Array Nat := #[47, 13, 82, 6, 91, 34, 57, 23, 76, 41, 88, 3, 65, 29, 54, 17, 72, 39, 84, 11, 63, 28, 95, 42, 7, 56, 31, 78, 19, 67, 44, 90, 25, 58, 14, 83, 37, 62, 9, 71, 48, 26, 93, 15, 52, 38, 77, 22, 69, 4, 86, 33, 61, 18, 45, 79, 12, 57, 35, 81, 24, 68, 43, 96, 8, 53, 27, 74, 16, 89, 41, 64, 30, 55, 20, 73, 46, 85, 10, 60, 36, 92, 21, 49, 66, 32, 75, 5, 87, 40, 59, 28, 70, 38, 94, 50, 80, 2, 97, 44]
-#eval (Array.quicksort2 demoArray2) == demoArray2.qsort -- is sorted:
+#eval! (Array.quicksort2 demoArray2) == demoArray2.qsort -- is sorted:
