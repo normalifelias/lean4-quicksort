@@ -190,25 +190,19 @@ def dnfstage2 [Ord α]
   match compare arr[unproc] arr[pvt] with
   | .lt =>
     if hfin : unproc ≥ fin_unproc then ⟨((arr.swap unproc eq), eq + 1, fin_unproc + 1), by simp; omega⟩ else
-    if hpvt : eq = pvt then dnfhelper4 (arr.swap unproc eq) unproc (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
-    if compare (arr[eq]) (arr[unproc]) = .lt then dnfhelper4 arr pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
-    dnfhelper4 (arr.swap unproc eq) pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+    if hpvt : eq = pvt then dnfstage2 (arr.swap unproc eq) unproc (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    if compare (arr[eq]) (arr[unproc]) = .lt then dnfstage2 arr pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    dnfstage2 (arr.swap unproc eq) pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
   | .gt =>
     if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc), by simp; omega⟩ else
-    if hpvt : fin_unproc = pvt then dnfhelper4 (arr.swap unproc fin_unproc) unproc eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
-    if compare (arr[fin_unproc]) (arr[unproc]) = .gt then dnfhelper4 arr pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
-    else dnfhelper4 (arr.swap unproc fin_unproc) pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+    if hpvt : fin_unproc = pvt then dnfstage2 (arr.swap unproc fin_unproc) unproc eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    if compare (arr[fin_unproc]) (arr[unproc]) = .gt then dnfstage2 arr pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+    else dnfstage2 (arr.swap unproc fin_unproc) pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
   | .eq =>
     if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc + 1), by simp; omega⟩ else
-    dnfhelper4 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
-
-
-
-
-
-
+    dnfstage2 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
 
 
