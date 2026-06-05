@@ -123,26 +123,30 @@ def dnfhelper2 [Ord α]
       dnfhelper2 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
 
-partial def dnfhelper4 [Ord α]
+def dnfhelper4 [Ord α]
   (arr : Vector α size) (pvt eq unproc fin_unproc : Nat) (sllo slhi : Nat)
-  : (Vector α size × Nat × Nat) :=
+  (heq_unproc : eq ≤ unproc) (hunproc_fin_unproc : unproc ≤ fin_unproc) (hfin_unproc : fin_unproc < size)
+  (hsllo : sllo ≤ eq) (hfin_unproc_slhi : fin_unproc < slhi) (hlohi : slhi - sllo > 1) (hslhi : slhi ≤ size)
+  (hpvt_sllo : sllo ≤ pvt) (hpvt_slhi : pvt < slhi) (hpvt_eq : eq ≤ pvt) (hpvt_fin_unproc : pvt ≤ fin_unproc)
+  : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size ∧ r.snd.fst < r.snd.snd} :=
 
-  match compare (arr[unproc]'sorry) (arr[pvt]'sorry) with
+  match hcmp : compare (arr[unproc]) (arr[pvt]) with
   | .lt =>
-    if unproc ≥ fin_unproc then ((arr.swap unproc eq (by sorry) (by sorry)), eq + 1, fin_unproc + 1) else
-    if compare (arr[eq]'sorry) (arr[unproc]'sorry) = .lt then dnfhelper4 arr pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi else
-    if eq == pvt then dnfhelper4 (arr.swap unproc eq (by sorry) (by sorry)) unproc (eq + 1) (unproc + 1) fin_unproc sllo slhi else
-    dnfhelper4 (arr.swap unproc eq (by sorry) (by sorry)) pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi
+    if hfin : unproc ≥ fin_unproc then ⟨((arr.swap unproc eq), eq + 1, fin_unproc + 1), by simp; sorry⟩ else
+    if hpvt : eq = pvt then dnfhelper4 (arr.swap unproc eq) unproc (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by sorry) (by omega) else
+    if compare (arr[eq]) (arr[unproc]) = .lt then dnfhelper4 arr pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    dnfhelper4 (arr.swap unproc eq) pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
   | .gt =>
-    if unproc ≥ fin_unproc then (arr, eq, fin_unproc) else
-    if compare (arr[fin_unproc]'sorry) (arr[unproc]'sorry) = .gt then dnfhelper4 arr pvt eq unproc (fin_unproc - 1) sllo slhi else
-    if fin_unproc == pvt then dnfhelper4 (arr.swap unproc fin_unproc (by sorry) (by sorry)) unproc eq unproc (fin_unproc - 1) sllo slhi
-    else dnfhelper4 (arr.swap unproc fin_unproc (by sorry) (by sorry)) pvt eq unproc (fin_unproc - 1) sllo slhi
+    if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc), by simp; sorry⟩ else
+    if hpvt : fin_unproc = pvt then dnfhelper4 (arr.swap unproc fin_unproc) unproc eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    if compare (arr[fin_unproc]) (arr[unproc]) = .gt then dnfhelper4 arr pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+    else dnfhelper4 (arr.swap unproc fin_unproc) pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
 
   | .eq =>
-    if unproc ≥ fin_unproc then (arr, eq, fin_unproc + 1) else
-    dnfhelper4 arr pvt eq (unproc + 1) fin_unproc sllo slhi
+    if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc + 1), by simp; omega⟩ else
+    dnfhelper4 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
 
 
 def dnf3 [Ord α] -- wrapper
@@ -164,9 +168,102 @@ def dnf2 [Ord α] -- wrapper
 
 def dnf4 [Ord α]
   (arr : Vector α size) (pvt : Nat) (sllo slhi : Nat)
-  : (Vector α size × Nat × Nat) :=
+  (hlohi : slhi - sllo > 1) (hhi : slhi ≤ size)
+  (hpvt : sllo ≤ pvt ∧ pvt < slhi)
+  : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size ∧ r.snd.fst < r.snd.snd} :=
 
-  dnfhelper4 arr pvt sllo sllo (slhi - 1) sllo slhi
+  dnfhelper4 arr pvt sllo sllo (slhi - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+
+
+
+
+
+
+def dnfstage2 [Ord α]
+  (arr : Vector α size) (pvt eq unproc fin_unproc : Nat) (sllo slhi : Nat)
+  (heq_unproc : eq < unproc) (hunproc_fin_unproc : unproc ≤ fin_unproc) (hfin_unproc : fin_unproc < size)
+  (hsllo : sllo ≤ eq) (hfin_unproc_slhi : fin_unproc < slhi) (hlohi : slhi - sllo > 1) (hslhi : slhi ≤ size)
+  (hpvt_sllo : sllo ≤ pvt) (hpvt_slhi : pvt < slhi) (hpvt_eq : eq ≤ pvt) (hpvt_fin_unproc : pvt ≤ fin_unproc)
+  : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size ∧ r.snd.fst < r.snd.snd} :=
+
+  match compare arr[unproc] arr[pvt] with
+  | .lt =>
+    if hfin : unproc ≥ fin_unproc then ⟨((arr.swap unproc eq), eq + 1, fin_unproc + 1), by simp; omega⟩ else
+    if hpvt : eq = pvt then dnfhelper4 (arr.swap unproc eq) unproc (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    if compare (arr[eq]) (arr[unproc]) = .lt then dnfhelper4 arr pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    dnfhelper4 (arr.swap unproc eq) pvt (eq + 1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+  | .gt =>
+    if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc), by simp; omega⟩ else
+    if hpvt : fin_unproc = pvt then dnfhelper4 (arr.swap unproc fin_unproc) unproc eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    if compare (arr[fin_unproc]) (arr[unproc]) = .gt then dnfhelper4 arr pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+    else dnfhelper4 (arr.swap unproc fin_unproc) pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+  | .eq =>
+    if hfin : unproc ≥ fin_unproc then ⟨(arr, eq, fin_unproc + 1), by simp; omega⟩ else
+    dnfhelper4 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+
+
+
+
+
+
+
+
+
+
+def dnfstage1 [Ord α]
+  (arr : Vector α size) (pvt eq unproc fin_unproc : Nat) (sllo slhi : Nat)
+  (heq_unproc : eq ≤ unproc) (hunproc_fin_unproc : unproc ≤ fin_unproc) (hfin_unproc : fin_unproc < size)
+  (hsllo : sllo ≤ eq) (hfin_unproc_slhi : fin_unproc < slhi) (hlohi : slhi - sllo > 1) (hslhi : slhi ≤ size)
+  (hpvt_sllo : sllo ≤ pvt) (hpvt_slhi : pvt < slhi) (hpvt_unproc : unproc ≤ pvt) (hpvt_fin_unproc : pvt ≤ fin_unproc)
+  : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size ∧ r.snd.fst < r.snd.snd} :=
+
+  if hpvt : unproc = pvt then
+    if hfin : fin_unproc = unproc then ⟨(arr, eq, fin_unproc + 1), by simp; omega⟩
+    else dnfstage2 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+  else match compare arr[unproc] arr[pvt] with
+  | .lt =>
+    --if hfin : fin_unproc ≤ unproc then ⟨(arr.swap eq unproc, eq + 1, fin_unproc + 1), by simp; omega⟩ else
+    dnfstage1 (arr.swap eq unproc) pvt (eq+1) (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+  | .gt =>
+    if hfin : fin_unproc = unproc then ⟨(arr, eq, fin_unproc), by simp; omega⟩ else
+    if hfin2 : fin_unproc - unproc = 1 then ⟨(arr.swap unproc fin_unproc, eq, fin_unproc), by simp; omega⟩ else
+    if hpvt2 : pvt = fin_unproc then dnfstage2 (arr.swap unproc pvt) unproc eq (unproc + 1) (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) else
+    dnfstage1 (arr.swap unproc fin_unproc) pvt eq unproc (fin_unproc - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+  | .eq =>
+    dnfstage2 arr pvt eq (unproc + 1) fin_unproc sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+
+def dnfstaged [Ord α]
+  (arr : Vector α size) (pvt : Nat) (sllo slhi : Nat)
+  (hlohi : slhi - sllo > 1) (hhi : slhi ≤ size)
+  (hpvt : sllo ≤ pvt ∧ pvt < slhi)
+  : {r : (Vector α size × Nat × Nat) // r.snd.snd ≤ slhi ∧ sllo ≤ r.snd.fst ∧ r.snd.fst ≤ size ∧ r.snd.fst < r.snd.snd} :=
+
+  dnfstage1 arr pvt sllo sllo (slhi - 1) sllo slhi (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -- add theorem : If pvt is in arr, then mid < hi, not only mid ≤ hi => termination proof fpr quicksorthelper2?
@@ -183,13 +280,13 @@ def quicksorthelper2 [Ord α]
   /-let pvt : α := pivotselect2 arr sllo slhi (by omega) (by omega)
   let ⟨(arr_parted, mid, hi), ⟨h1, h2, h3⟩⟩ := dnf2 arr pvt sllo slhi (by omega) (by omega)-/
   let pvt := pivotselect3 arr sllo slhi (by omega) (by omega)
-  let (arr_parted, mid, hi) := (dnf4 arr pvt sllo slhi)
+  let ⟨(arr_parted, mid, hi), ⟨h1, h2, h3⟩⟩ := (dnfstaged arr pvt sllo slhi (by omega) (by omega) (by omega))
 
   --if mid - sllo > slhi - hi then --worth it?
-    have hterm : slhi - hi < slhi - sllo := by sorry
-    let arr_half_sorted := quicksorthelper2 arr_parted hi slhi (by omega) (by sorry) (by omega)
-    have hterm2 : mid - sllo < slhi - sllo := by sorry
-    quicksorthelper2 arr_half_sorted sllo mid (by omega) (by sorry) (by omega)
+    have hterm : slhi - hi < slhi - sllo := by simp only [] at h1 h2 h3; omega
+    let arr_half_sorted := quicksorthelper2 arr_parted hi slhi (by omega) (by omega) (by omega)
+    have hterm2 : mid - sllo < slhi - sllo := by simp only [] at h1 h2 h3; omega
+    quicksorthelper2 arr_half_sorted sllo mid (by omega) (by omega) (by omega)
 
   /-else
 
