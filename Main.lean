@@ -8,10 +8,16 @@ import Lean4Quicksort.Benchmark
 -- Legacy: Splits array into list of tasks, being either left to sort or ready to be pushed. Deprecated.
 
 def main : IO Unit := do
-  benchmark 3 1000000 Array.quicksort2 "V2"
-  benchmark 3 1000000 Array.qsort "qsort"
-  benchmarkASC 3 1000000 Array.quicksort2 "V2 - asc"
-  benchmarkASC 3 1000000 Array.qsort "qsort - asc"
-  benchmarkDSC 3 1000000 Array.quicksort2 "V2 - dsc"
-  benchmarkDSC 3 1000000 Array.qsort "qsort - dsc"
-  benchmarkRPL 3 1000000 Array.quicksort2 "V2 - rpl"
+  let runs := 3
+  let elements := 1000000
+  benchmark runs elements Array.qsortn "qsortn"
+  benchmark runs elements Array.qsortOrdn "qsortOrdn"
+  benchmark runs elements Array.qsort "qsort"
+  benchmarkASC runs elements Array.qsortn "qsortn - asc"
+  benchmarkASC runs elements Array.qsortOrdn "qsortOrdn - asc"
+  benchmarkASC runs elements Array.qsort "qsort - asc"
+  benchmarkDSC runs elements Array.qsortn "qsortn - dsc"
+  benchmarkDSC runs elements Array.qsortOrdn "qsortOrdn - dsc"
+  benchmarkDSC runs elements Array.qsort "qsort - dsc"
+  benchmarkRPL runs elements Array.qsortn "qsortn- rpl"
+  benchmarkRPL runs elements Array.qsortOrdn "qsortOrdn - rpl"
